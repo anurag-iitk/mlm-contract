@@ -12,4 +12,10 @@ contract MLM {
     uint256 public cycleCount;
     uint256 private usersInCurrentCycle;
 
+    mapping(address => User) internal users;
+    mapping(uint256 => address) public idToAddress;
+    mapping(address => uint256) public addressToId;
+    mapping(uint8 => uint256) public levelPrice;
+    mapping(address => uint256) public balances;
+
 }
