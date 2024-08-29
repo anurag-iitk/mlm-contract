@@ -101,6 +101,7 @@ contract MLM {
             msg.value == REGISTRATION_FEE,
             "Registration requires the correct fee."
         );
+        require(isValidEmail(_email), "Invalid email format");
         for (uint256 i = 0; i < userAddresses.length; i++) {
             address userAddr = userAddresses[i];
             if (
@@ -205,6 +206,34 @@ contract MLM {
             uint256 newUserIdInt = lastUserIdInt + 1;
             return toString(newUserIdInt);
         }
+    }
+
+    function isValidEmail(string memory _email) internal pure returns (bool) {
+        bytes memory emailBytes = bytes(_email);
+        bytes memory domain = bytes("gmail.com");
+        uint256 atPosition = 0;
+        bool hasAt = false;
+        for (uint256 i = 0; i < emailBytes.length; i++) {
+            if (emailBytes[i] == bytes1("@")) {
+                if (hasAt) {
+                    return false;
+                }
+                hasAt = true;
+                atPosition = i;
+            }
+        }
+        if (!hasAt || atPosition == 0 || atPosition >= emailBytes.length - 1) {
+            return false;
+        }
+        if (emailBytes.length < atPosition + 1 + domain.length) {
+            return false;
+        }
+        for (uint256 i = 0; i < domain.length; i++) {
+            if (emailBytes[atPosition + 1 + i] != domain[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     function generateReferralLink(
