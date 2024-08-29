@@ -77,6 +77,115 @@ contract MLM {
         levelPrice[12] = 9900 ether;
     }
 
+    function registerUser(
+        string memory _firstName,
+        string memory _lastName,
+        string memory _email,
+        string memory _password,
+        string memory _profilePic,
+        string memory _uplineId
+    ) public payable {
+        require(
+            bytes(users[msg.sender].info.userId).length == 0,
+            "User already registered."
+        );
+        require(
+            msg.value == REGISTRATION_FEE,
+            "Registration requires the correct fee."
+        );
+        for (uint256 i = 0; i < userAddresses.length; i++) {
+            address userAddr = userAddresses[i];
+            if (
+                keccak256(abi.encodePacked(users[userAddr].details.email)) ==
+                keccak256(abi.encodePacked(_email))
+            ) {
+                revert("Email already exists");
+            }
+        }
+        string memory userId = generateUserId();
+        address uplineAddress;
+
+        if (
+            keccak256(abi.encodePacked(userId)) !=
+            keccak256(abi.encodePacked("1"))
+        ) {
+            require(bytes(_uplineId).length > 0, "Upline ID is required.");
+            uplineAddress = findAddressByUserId(_uplineId);
+            require(uplineAddress != address(0), "Upline not found.");
+        } else {
+            _uplineId = "";
+            uplineAddress = address(0);
+        }
+
+        if (usersInCurrentCycle == SPOTS_X3) {
+            cycleCount++;
+            usersInCurrentCycle = 0;
+        }
+
+        usersInCurrentCycle++;
+
+        uint256 distributeAmount = msg.value / 2;
+
+        string memory referralLink = generateReferralLink(userId);
+
+        UserDetails memory newUserDetails = UserDetails({
+            firstName: _firstName,
+            lastName: _lastName,
+            profilePic: _profilePic,
+            email: _email,
+            passwordHash: keccak256(abi.encodePacked(_password))
+        });
+
+        User storage user = users[msg.sender];
+
+        user.details = newUserDetails;
+        user.info.upline = uplineAddress;
+        user.info.id = lastUserId;
+        user.info.referralCount = 0;
+        user.info.cycleCount = 0;
+        user.info.earnings = 0;
+        user.info.partnerLevel = 1;
+        user.info.referrals = new address[](0);
+        user.info.userId = userId;
+        user.info.uplineId = _uplineId;
+        user.info.walletAddress = msg.sender;
+        user.info.referralLink = referralLink;
+        user.info.cycle = cycleCount;
+        user.info.isLevelActive[1] = true;
+        userAddresses.push(msg.sender);
+        idToAddress[lastUserId] = msg.sender;
+        addressToId[msg.sender] = lastUserId;
+        lastUserId++;
+
+        emit UserRegistered(msg.sender, userId, _uplineId, referralLink);
+
+        // Transfer the registration fee to the appropriate recipient
+        if (uplineAddress != address(0)) {
+            users[uplineAddress].info.referrals.push(msg.sender);
+
+            // Transfer the registration fee based on the updated logic
+            uint256 uplineReferralCount = users[uplineAddress]
+                .info
+                .referralCount;
+            if (uplineReferralCount <= 2) {
+                // Send fee to the upline directly
+                payable(uplineAddress).transfer(distributeAmount);
+            } else if (uplineReferralCount == 3) {
+                // If third referral, send fee to the upline's upline (cycle reset handled in handleReferral)
+                address uplineOfUpline = users[uplineAddress].info.upline;
+                if (uplineOfUpline != address(0)) {
+                    payable(uplineOfUpline).transfer(distributeAmount);
+                } else {
+                    // Fallback to owner if no upline's upline exists
+                    payable(owner).transfer(msg.value);
+                }
+            }
+        } else {
+            // If no upline (first user), send fee to the owner
+            payable(owner).transfer(msg.value);
+        }
+    }
+
     function generateUserId() internal view returns (string memory) {
         if (userAddresses.length == 0) {
             return "1";
