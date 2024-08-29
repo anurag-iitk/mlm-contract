@@ -128,4 +128,17 @@ contract MLM {
         }
         return string(buffer);
     }
+
+    function getX3ProgramInfo(
+        address _user
+    ) public view returns (X3ProgramInfo memory) {
+        return
+            X3ProgramInfo({
+                earnings: users[_user].info.earnings,
+                level: users[_user].info.partnerLevel,
+                cycleCount: users[_user].info.cycleCount,
+                upline: users[_user].info.upline,
+                referrals: users[_user].info.referrals
+            });
+    }
 }
