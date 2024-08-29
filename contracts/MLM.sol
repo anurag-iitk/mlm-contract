@@ -33,6 +33,8 @@ contract MLM {
         string referralLink
     );
 
+    event Earnings(address indexed user, uint256 amount);
+
     constructor() payable {
         owner = msg.sender;
         cycleCount = 1;
@@ -193,6 +195,13 @@ contract MLM {
             // If no upline (first user), send fee to the owner
             payable(owner).transfer(msg.value);
         }
+    }
+
+    function rewardUser(address _user, uint256 _amount) internal virtual {
+        users[_user].info.earnings += _amount;
+        balances[_user] += _amount;
+
+        emit Earnings(_user, _amount);
     }
 
     function generateUserId() internal view returns (string memory) {
