@@ -85,6 +85,14 @@ contract MLM {
         string memory _profilePic,
         string memory _uplineId
     ) public payable {
+        require(bytes(_firstName).length > 0, "First name must not be empty");
+        require(bytes(_lastName).length > 0, "Last name must not be empty");
+        require(bytes(_email).length > 0, "Email must not be empty");
+        require(bytes(_password).length > 0, "Password must not be empty");
+        require(
+            bytes(_profilePic).length > 0,
+            "Profile picture must not be empty"
+        );
         require(
             bytes(users[msg.sender].info.userId).length == 0,
             "User already registered."
