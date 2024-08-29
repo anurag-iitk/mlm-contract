@@ -176,6 +176,9 @@ contract MLM {
         if (uplineAddress != address(0)) {
             users[uplineAddress].info.referrals.push(msg.sender);
 
+            // Call handleReferral function to manage referral earnings and cycle
+            handleReferral(msg.sender);
+
             // Transfer the registration fee based on the updated logic
             uint256 uplineReferralCount = users[uplineAddress]
                 .info
