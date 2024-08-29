@@ -35,6 +35,8 @@ contract MLM {
 
     event Earnings(address indexed user, uint256 amount);
 
+    event NewCycle(address indexed user, uint256 indexed cycleCount);
+
     constructor() payable {
         owner = msg.sender;
         cycleCount = 1;
