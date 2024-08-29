@@ -27,4 +27,11 @@ contract MLM {
     mapping(uint8 => uint256) public levelPrice;
     mapping(address => uint256) public balances;
 
+    event UserRegistered(
+        address indexed walletAddress,
+        string indexed userId,
+        string indexed uplineId,
+        string referralLink
+    );
+
 }
