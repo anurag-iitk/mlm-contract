@@ -199,6 +199,38 @@ contract MLM {
         }
     }
 
+    function handleReferral(address _user) internal {
+        address upline = users[_user].info.upline;
+
+        if (users[upline].info.referralCount <= 2) {
+            // First and second referrals go to the upline's wallet
+            uint8 level = users[upline].info.partnerLevel;
+            if (level >= 1) {
+                rewardUser(upline, levelPrice[level]);
+            }
+        } else if (users[upline].info.referralCount == 3) {
+            // Third referral's payment completes the cycle
+            address uplineOfUpline = users[upline].info.upline;
+            uint8 level = users[upline].info.partnerLevel;
+
+            if (uplineOfUpline != address(0)) {
+                // Send earnings to upline's upline and reset the cycle
+                rewardUser(uplineOfUpline, levelPrice[level]);
+                users[upline].info.cycleCount++;
+                emit NewCycle(upline, users[upline].info.cycleCount);
+            } else {
+                // Fallback to owner if no upline's upline exists
+                rewardUser(owner, levelPrice[level]);
+            }
+
+            // Reset upline's referral count after completing the cycle
+            users[upline].info.referralCount = 0;
+        }
+
+        // Increment the referral count for the upline
+        users[upline].info.referralCount++;
+    }
+
     function rewardUser(address _user, uint256 _amount) internal virtual {
         users[_user].info.earnings += _amount;
         balances[_user] += _amount;
