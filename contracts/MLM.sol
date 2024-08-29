@@ -141,4 +141,8 @@ contract MLM {
                 referrals: users[_user].info.referrals
             });
     }
+
+    function getUserTotalBalance(address _user) public view returns (uint256) {
+        return balances[_user];
+    }
 }
