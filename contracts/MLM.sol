@@ -59,7 +59,7 @@ contract MLM {
         user.info.userId = "0";
         user.info.uplineId = "";
         user.info.walletAddress = owner;
-        user.info.referralLink = "";
+        user.info.referralLink = generateReferralLink("0");
         user.info.cycle = 1;
         user.info.isLevelActive[1] = true;
 
