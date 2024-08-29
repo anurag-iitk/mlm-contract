@@ -129,6 +129,21 @@ contract MLM {
         return string(buffer);
     }
 
+    function findAddressByUserId(
+        string memory _userId
+    ) internal view returns (address) {
+        for (uint256 i = 0; i < userAddresses.length; i++) {
+            if (
+                keccak256(
+                    abi.encodePacked(users[userAddresses[i]].info.userId)
+                ) == keccak256(abi.encodePacked(_userId))
+            ) {
+                return userAddresses[i];
+            }
+        }
+        return address(0);
+    }
+
     function getX3ProgramInfo(
         address _user
     ) public view returns (X3ProgramInfo memory) {
