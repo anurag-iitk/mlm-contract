@@ -77,6 +77,19 @@ contract MLM {
         levelPrice[12] = 9900 ether;
     }
 
+    function generateUserId() internal view returns (string memory) {
+        if (userAddresses.length == 0) {
+            return "1";
+        } else {
+            string memory _lastUserId = users[
+                userAddresses[userAddresses.length - 1]
+            ].info.userId;
+            uint256 lastUserIdInt = stringToUint(_lastUserId);
+            uint256 newUserIdInt = lastUserIdInt + 1;
+            return toString(newUserIdInt);
+        }
+    }
+
     function generateReferralLink(
         string memory userId
     ) internal pure returns (string memory) {
