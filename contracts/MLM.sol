@@ -7,7 +7,6 @@ pragma solidity ^0.8.24;
 import "./DataTypes.sol";
 
 contract MLM {
-
     address public owner;
     uint256 public cycleCount;
     uint256 private usersInCurrentCycle;
@@ -78,4 +77,12 @@ contract MLM {
         levelPrice[12] = 9900 ether;
     }
 
+    function generateReferralLink(
+        string memory userId
+    ) internal pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked("https://myplatform.com/referral/", userId)
+            );
+    }
 }
